@@ -113,7 +113,6 @@ define('forum/register', [
 
     function validateUsername(username, callback) {
         callback = callback || function () {};
-
         const username_notify = $('#username-notify');
         const userslug = slugify(username);
         if (username.length < ajaxify.data.minimumUsernameLength ||
@@ -129,11 +128,15 @@ define('forum/register', [
                 api.head(`/groups/${username}`, {}),
             ]).then((results) => {
                 if (results.every(obj => obj.status === 'rejected')) {
+                    // Username is available
                     showSuccess(username_notify, successIcon);
                 } else {
+                    // Username is taken, suggest an alternative by appending a suffix
+                    const suggestedUsername = username + 'suffix';
                     showError(username_notify, '[[error:username-taken]]');
+                    $('#yourUsername').text(suggestedUsername); // Suggest the alternative username
+                    showSuccess(username_notify, `[[info:suggested-username]]: ${suggestedUsername}`);
                 }
-
                 callback();
             });
         }
